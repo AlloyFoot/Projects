@@ -19,4 +19,18 @@ else:
 
 print()
 
+print("Did you learn something today? (yes/no): ")
+learn = input().lower()
+
+print()
+
+if learn == "yes":
+    print("I hope that it was helpful!")
+else:
+    print("Everyone learns something, whether they realize it or not.\nIt could be as small as learning what you wanted to wear today, or learning that it was going to rain!")
+
+print()
+
 print(f"It was nice chatting with you, {name}! Goodbye!")
+
+# https://github.com/AlloyFoot/Projects.git
