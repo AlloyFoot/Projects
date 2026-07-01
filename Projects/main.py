@@ -1,60 +1,62 @@
-from hf import generate_response
-import time
-def temperature_prompt_activity():
-    print("=" * 70)
-    print("Advanced Prompt Activity: Temperature")
-    print("=" * 70)
+from groq import generate_response
+def reinforcement_learning_activity():
+    print("\nWelcome to the Reinforcement Learning Activity!\n")
+    prompt = input("Enter a prompt for the AI Model (e.g. 'What is reinforcement learning?'): ").lower().strip()
+    if not prompt:
+        print("No prompt provided. Exiting the activity.")
+        return
+    
+    rating = 0
+    while rating < 4:
+        initial_response = generate_response(prompt, temperature=0.3, max_tokens=1028)
+        print("\nInitial Response from the AI Model:\n")
+        print(initial_response)
+        try:
+            rating = int(input("\nPlease rate the response on a scale of 1 to 5 (1 being poor, 5 being excellent): "))
+            if rating < 1 or rating > 5:
+                print("Invalid rating. Please enter a number between 1 and 5.")
+                return
+        except ValueError:
+            print("Invalid input. Using 3.")
+            rating = 3
+        feedback = input("Please provide feedback for the AI Model : ").strip()
+        improved_response = f"{initial_response}\n\nUser Feedback: {feedback}\n\nPlease improve the response based on the feedback."
+        print(f"\nImproved Response from the AI Model:{improved_response}\n")
+        prompt = improved_response
 
-    print("Part 1: Temperature Exploration")
-    base = input("Enter a creative prompt (e.g., 'Write a short story about a dragon'): ")
-    for t, label in [(0.1, "LOW (0.1) - Deterministic"), (0.5, "MEDIUM (0.5) - Balanced"), (0.9, "HIGH (1.0) - Creative")]:
-        print(f"\n{label}")
-        print("-" * len(label))
-        response = generate_response(base, temperature=t)
-        print(response)
-        time.sleep(1)
-    print("\nPart 2: Instruction-Based Prompts")
-    topic = input("Enter a topic for an instruction-based prompt (e.g., 'Explain quantum computing in simple terms'): ")
-    prompts = [
-        f"Summarize key facts about {topic} in 3-4 sentences.",
-        f"Explain {topic} to a 5-year-old.",
-        f"Write a pro/con list about {topic}.",
-        f"Create a fictional news headline from 2050 about {topic}."
-    ]
-    for i, p in enumerate(prompts, 1):
-        print(f"\nPrompt {i}: {p}")
-        response = generate_response(p, temperature=0.7)
-        print(response)
-        time.sleep(1)
-    print("\nPart 3: Your Own Instruction Prompt")
-    user_prompt = input("Enter your own instruction-based prompt: ")
-    try:
-        temp = float(input("Enter a temperature value (0.0 to 1.0): "))
-        if not (0.0 <= temp <= 1.0):
-            raise ValueError("Temperature must be between 0.0 and 1.0.")
-    except ValueError as ve:
-        print(f"Invalid temperature input: {ve}. Using default temperature of 0.7.")
-        temp = 0.7
-    print(f"\nYour Prompt: {user_prompt} (Temperature: {temp})")
-    print(generate_response(user_prompt, temperature=temp, max_tokens=512))
-    print("\nREFELECTION:")
-    print("1. what changed when prompts became more specific or detailed?")
-    print("2. what improved when context was provided in the prompts?")
-    print("3. which prompt felt most useful and why?")
-    print("\nChanllenge: create a prompt chain: ")
-    print("Start with a base prompt, then iteratively refine it based on the model's responses to achieve a more detailed or specific output.")
-def pseudo_stream(text, delay= 0.013):
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(delay)
-    print()
-def bonus_stream():
-    choice = input("\nBONUS: streaming output? (y/n): ").lower().strip()
-    if choice == 'y':
-        p = input("Enter a prompt for streaming output: ").strip()
-        out = generate_response(p, temperature=0.7, max_tokens=512)
-        print("\nStreaming Output:")
-        pseudo_stream(out)
+
+    print("Reflection:")
+    print("1. How did the AI model's response change after receiving feedback?")
+    print("2. What aspects of the response were improved or remained the same?")
+def role_based_prompt_activity():
+    print("\nWelcome to the Role-Based Prompt Activity!\n")
+    category = input("Enter a category (e.g. science, history, math): ").lower().strip()
+    item = input(f"Enter a specific item in the category of {category}: ").lower().strip()
+    if not category or not item:
+        print("Category or item not provided. Exiting the activity.")
+        return
+    teacher_prompt = f"Imagine you are a teacher explaining {item} in the context of {category}. Provide a detailed explanation suitable for students."
+    expert_prompt = f"Imagine you are an expert in {category}. Provide an in-depth analysis of {item}, including its significance and applications."
+    teacher_response = generate_response(teacher_prompt, temperature=0.3, max_tokens=1028)
+    expert_response = generate_response(expert_prompt, temperature=0.3, max_tokens=1028)
+    print("\nTeacher's Response:\n")
+    print(teacher_response)
+    print("\nExpert's Response:\n")
+    print(expert_response)
+    print("\nReflection:")
+    print("1. How did the responses differ based on the role of the AI model?")
+    print("2. What insights did you gain from comparing the two responses?")
+def run_activity():
+    print("Welcome to the AI Model Interaction Activities!")
+    print("Please choose an activity:")
+    print("1. Reinforcement Learning Activity")
+    print("2. Role-Based Prompt Activity")
+    choice = input("Enter the number of the activity you want to participate in (1 or 2): ").strip()
+    if choice == '1':
+        reinforcement_learning_activity()
+    elif choice == '2':
+        role_based_prompt_activity()
+    else:
+        print("Invalid choice. Please enter 1 or 2.")
 if __name__ == "__main__":
-    temperature_prompt_activity()
-    bonus_stream()
+    run_activity()
