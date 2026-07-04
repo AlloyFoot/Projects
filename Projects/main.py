@@ -1,45 +1,74 @@
-from groq import generate_response
-def bias_mitigation_activity():
-    print("Welcome to the Bias Mitigation Activity!")
-    prompt = input("Please enter a scenario or situation where bias may occur (e.g. 'Describe the ideal doctor'): ").strip()
-    if not prompt:
-        print("You did not enter a scenario. Please try again.")
-        return
-    initial_response = generate_response(prompt, temperature=0.3, max_tokens=1024)
-    print("\nInitial Response:")
-    print(initial_response)
-    modified_prompt = input(f"Please provide a more inclusive and unbiased version of the following response: {initial_response} (e.g. 'Describe the qualities of a doctor'): ").strip()
-    if modified_prompt:
-        modified_response = generate_response(modified_prompt, temperature=0.3, max_tokens=1024)
-        print("\nModified Response:")
-        print(modified_response)
-    else:
-        print("You did not provide a modified prompt. The activity will end here.")
-def token_limit_activity():
-    print("Welcome to the Token Limit Activity!")
-    long_prompt = input("Enter a long prompt (e.g. 'Write a detailed story about a robot'): ").strip()
-    if long_prompt:
-        long_response = generate_response(long_prompt, temperature=0.3, max_tokens=1024)
-        preview = (long_response[:500] + '...') if len(long_response) > 500 else long_response
-        print(f"\nResponse to Long Prompt (Preview):\n{preview}")
-    else:
-        print("You did not enter a long prompt. Skipping long prompt.")
-    short_prompt = input("Now, condense the long prompt to be more concise (e.g. 'Write a short, 1 paragraph story about a robot'): ").strip()
-    if short_prompt:
-        short_response = generate_response(short_prompt, temperature=0.3, max_tokens=1024)
-        print(f"\nResponse to Short Prompt:\n{short_response}")
-    else:
-        print("You did not enter a short prompt. The activity will end here.")
+from hf import generate_response
+def get_essay_details():
+    print("\nAI writing assistant\n")
+    topic = input("Enter the topic for your essay: ").strip()
+    essay_type = input("Enter the type of essay (e.g., argumentative, descriptive, narrative): ").strip()
+    lengths = ["300 words", "900 words", "1200 words", "2000 words"]
+    print("\nSelect the desired length of the essay:")
+    for i, length in enumerate(lengths, start=1):
+        print(f"{i}. {length}")
+    try:
+        idx = int(input("> ").strip())
+        length = lengths[idx - 1] if 1 <= idx <= len(lengths) else lengths[0]
+    except ValueError:
+        length = lengths[0]
+    target_audience = input("Enter the target audience for your essay: ").strip()
+    return {"topic": topic, "essay_type": essay_type, "length": length, "target_audience": target_audience}
+def generate_essay_content(details):
+    try:
+        temp = float(input("Enter the temperature for the essay generation (0.0 to 1.0, default is 0.7): ").strip())
+        if not (0.0 <= temp <= 1.0):
+            raise ValueError
+    except ValueError:
+        print("Invalid input. Using default temperature of 0.3.")
+        temp = 0.3
+    intro_p = f"Write an introduction for an {details['essay_type']} essay on the topic '{details['topic']}' for a {details['target_audience']} audience in {details['length']}."
+    intro = generate_response(intro_p, temperature=temp, max_tokens=1024)
+    print("\nGenerated Introduction:\n")
+    print(intro)
+    print("\nWould you like the body writeen as a full draft or in sections? (Enter 'full' or 'sections')")
+    choice = input("> ").strip().lower()
+    if choice == 'full':
+        body_p = f"Write the full body of an {details['essay_type']} essay on the topic '{details['topic']}' for a {details['target_audience']} audience in {details['length']}."
+        body = generate_response(body_p, temperature=temp, max_tokens=1024)
+        print("\nGenerated Body:\n")
+        print(body)
+    elif choice == 'sections':
+        step_p = f"Write step-by-step sections for an {details['essay_type']} essay on the topic '{details['topic']}' for a {details['target_audience']} audience in {details['length']}."
+        body_step = generate_response(step_p, temperature=temp, max_tokens=1024)
+        print("\nGenerated Body Sections:\n")
+        print(body_step)
+
+    concl_p = f"Write a conclusion for an {details['essay_type']} essay on the topic '{details['topic']}' for a {details['target_audience']} audience in {details['length']}."
+    concl = generate_response(concl_p, temperature=temp, max_tokens=1024)
+    print("\nGenerated Conclusion:\n")
+    print(concl)
+def feedback_and_refinement():
+    print("\nWould you like to provide feedback for refinement? (yes/no)")
+    feedback_choice = input("> ").strip().lower()
+    if feedback_choice == 'yes':
+        try:
+            rating = int(input("Please rate the essay on a scale of 1 to 5: ").strip())
+            if not (1 <= rating <= 5):
+                raise ValueError("Invalid rating. Please enter a number between 1 and 5.")
+        except ValueError:
+            print("Invalid rating. Using 3.")
+            rating = 3
+        if rating != 5:
+            feedback = input("Please provide your feedback: ").strip()
+            print("\nRefining the essay based on your feedback...\n")
+            refined_essay = generate_response(f"Refine the essay based on the following feedback: {feedback}", temperature=0.3, max_tokens=1024)
+            print("\nRefined Essay:\n")
+            print(refined_essay)
+        else:
+            print("Thank you for your feedback! No refinement needed.")
 def run_activity():
-    print("\nSelect an activity:")
-    print("1. Bias Mitigation Activity")
-    print("2. Token Limit Activity")
-    choice = input("Enter your choice (1-2): ").strip()
-    if choice == "1":
-        bias_mitigation_activity()
-    elif choice == "2":
-        token_limit_activity()
-    else:
-        print("Invalid choice. Please enter a number between 1 and 2.")
+    print("Welcome to the AI Writing Assistant!")
+    details = get_essay_details()
+    if not details['topic'] or not details['essay_type'] or not details['target_audience']:
+        print("Error: All fields are required. Please try again.")
+        return
+    generate_essay_content(details)
+    feedback_and_refinement()
 if __name__ == "__main__":
     run_activity()
